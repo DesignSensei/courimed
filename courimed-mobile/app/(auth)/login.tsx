@@ -3,11 +3,65 @@ import { useRouter } from "expo-router";
 import { colors } from '../constants/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useState } from 'react';
+import axios from 'axios';
+import CustomAlert from '../components/CustomAlert';
 
 export default function Login() {
   const router = useRouter();
   const [isChecked, setIsChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertData, setAlertData] = useState({ title: '', message: '', onConfirm: () => {} });
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setAlertData({
+        title: 'Error',
+        message: 'Please fill all fields',
+        onConfirm: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
+      return;
+    }
+
+    console.log('Login attempted with:', { email, password });
+
+    try {
+      const response = await axios.post('http://192.168.38.221:5000/api/auth/login', {
+        email,
+        password,
+      });
+      setAlertData({
+        title: 'Success',
+        message: 'Logged in successfully',
+        onConfirm: () => {
+          setAlertVisible(false);
+          router.push('/loadingScreen');
+        },
+      });
+      setAlertVisible(true);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log('Login Error:', error.message);
+        console.log('Error Details:', error.response.data);
+        setAlertData({
+          title: 'Error',
+          message: error.response.data.message || 'Invalid credentials',
+          onConfirm: () => setAlertVisible(false),
+        });
+        setAlertVisible(true);
+      } else {
+        setAlertData({
+          title: 'Error',
+          message: 'Something went wrong',
+          onConfirm: () => setAlertVisible(false),
+        });
+        setAlertVisible(true);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -26,6 +80,8 @@ export default function Login() {
           placeholder="Email address"
           placeholderTextColor={colors.neutral[500]}
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
         <View style={styles.passwordContainer}>
           <TextInput
@@ -33,7 +89,8 @@ export default function Login() {
             placeholder="Password"
             placeholderTextColor={colors.neutral[500]}
             secureTextEntry={!showPassword}
-            value={undefined}
+            value={password}
+            onChangeText={setPassword}
           />
           <TouchableOpacity
             style={styles.iconButton}
@@ -64,7 +121,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={() => router.push("../(app)/index")}>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Log in</Text>
         </TouchableOpacity>
 
@@ -92,10 +149,15 @@ export default function Login() {
         </View>
 
         <TouchableOpacity onPress={() => router.push("/signup")}>
-          <Text style={styles.signupText}>Don’t have an account? <Text style={styles.signupSignUpText}>Sign up</Text>
-          </Text>
+          <Text style={styles.signupText}>Don’t have an account? <Text style={styles.signupSignUpText}>Sign up</Text></Text>
         </TouchableOpacity>
 
+        <CustomAlert
+          isVisible={alertVisible}
+          title={alertData.title}
+          message={alertData.message}
+          onConfirm={alertData.onConfirm}
+        />
       </View>
     </View>
   );
@@ -108,20 +170,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
-  
   formContainer: {
     alignItems: 'center',
   },
-
   icon: {
     marginBottom: 10,
   },
-
   iconImage: {
     width: 160,
     height: 160,
   },
-
   title: {
     fontSize: 28,
     fontFamily: 'Nunito_700Bold',
@@ -129,7 +187,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-
   input: {
     width: '100%',
     height: 50,
@@ -143,14 +200,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.neutral[300],
   },
-
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
     position: 'relative',
   },
-
   iconButton: {
     position: 'absolute',
     right: 20,
@@ -158,7 +213,6 @@ const styles = StyleSheet.create({
     padding: 0,
     justifyContent: 'center',
   },
-
   checkboxContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -166,25 +220,21 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 16,
   },
-
   checkboxWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   checkboxText: {
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: colors.neutral[900],
     marginLeft: 8,
   },
-
   forgotText: {
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: colors.primary[500],
   },
-
   loginButton: {
     width: '100%',
     height: 50,
@@ -194,40 +244,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-
   loginButtonText: {
     fontSize: 16,
     fontFamily: 'Nunito_700Bold',
     color: colors.shades.white,
   },
-
   orContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 16,
     width: '100%',
   },
-
   line: {
     flex: 1,
     height: 1,
     backgroundColor: colors.neutral[300],
   },
-
   orText: {
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: colors.neutral[500],
     marginHorizontal: 8,
   },
-
   socialContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 16,
   },
-
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -238,25 +282,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     justifyContent: 'center',
   },
-
   socialIcon: {
     width: 20,
     height: 20,
     marginRight: 8,
   },
-
   socialText: {
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: colors.neutral[900],
   },
-
   signupText: {
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: colors.primary[500],
   },
-
   signupSignUpText: {
     fontSize: 14,
     fontFamily: 'Nunito_700Bold',
