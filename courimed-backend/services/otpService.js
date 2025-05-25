@@ -6,7 +6,7 @@ const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 exports.sendOtp = async (email) => {
   const otp = generateOtp();
-  await OTP.create({ email, code: otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+  await OTP.create({ email, code: otp });
 
   // Send Email
   const transporter = nodemailer.createTransport({
