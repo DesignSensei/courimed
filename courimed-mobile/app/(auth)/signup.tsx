@@ -1,23 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text, View, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { useRouter } from "expo-router";
+import { Text, View, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useRouter } from 'expo-router';
 import { colors } from '../constants/colors';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useState } from 'react';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import CustomAlert from '../components/CustomAlert';
 
 export default function Signup() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertData, setAlertData] = useState({ title: '', message: '', onConfirm: () => {} });
 
   const handleSignup = async () => {
-    if (!fullName || !email || !password) {
+    if (!firstName || !lastName || !email || !password) {
       setAlertData({
         title: 'Error',
         message: 'Please fill all fields',
@@ -27,23 +28,22 @@ export default function Signup() {
       return;
     }
 
-    console.log('Signup attempted with:', { fullName, email, password });
+    console.log('Signup attempted with:', { firstName, lastName, email, password });
 
     try {
-      const response = await axios.post('http://192.168.38.221:5000/api/auth/register', {
-        name: fullName,
+      const response = await axios.post('http://192.168.133.221:5000/api/auth/register', {
+        firstName,
+        lastName,
         email,
         password,
       });
-      setAlertData({
-        title: 'Success',
-        message: 'User registered successfully',
-        onConfirm: () => {
-          setAlertVisible(false);
-          router.push('/login');
-        },
+
+      console.log('Signup Response:', response.data);
+
+      router.push({
+        pathname: '/otp',
+        params: { email: encodeURIComponent(email) },
       });
-      setAlertVisible(true);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         console.log('Signup Error:', error.message);
@@ -65,35 +65,12 @@ export default function Signup() {
     }
   };
 
-  // Function to clear all stored data, will be removed in production
-  const clearStoredData = async () => {
-    try {
-      await AsyncStorage.clear();
-      setAlertData({
-        title: 'Success',
-        message: 'All stored data has been removed. Try logging in again.',
-        onConfirm: () => {
-          setAlertVisible(false);
-          router.replace('/login');
-        },
-      });
-      setAlertVisible(true);
-    } catch (error) {
-      setAlertData({
-        title: 'Error',
-        message: 'Something went wrong',
-        onConfirm: () => setAlertVisible(false),
-      });
-      setAlertVisible(true);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
         <View style={styles.icon}>
           <Image
-            source={require("../../assets/images/courimed-logo-mix.png")}
+            source={require('../../assets/images/courimed-logo-mix.png')}
             style={styles.iconImage}
             resizeMode="contain"
           />
@@ -102,11 +79,20 @@ export default function Signup() {
 
         <TextInput
           style={styles.input}
-          placeholder="Full name"
+          placeholder="First name"
           placeholderTextColor={colors.neutral[500]}
           autoCapitalize="words"
-          value={fullName}
-          onChangeText={setFullName}
+          value={firstName}
+          onChangeText={setFirstName}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Last name"
+          placeholderTextColor={colors.neutral[500]}
+          autoCapitalize="words"
+          value={lastName}
+          onChangeText={setLastName}
         />
 
         <TextInput
@@ -117,7 +103,7 @@ export default function Signup() {
           value={email}
           onChangeText={setEmail}
         />
-        
+
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
@@ -132,7 +118,7 @@ export default function Signup() {
             onPress={() => setShowPassword(!showPassword)}
           >
             <Ionicons
-              name={showPassword ? "eye-off" : "eye"}
+              name={showPassword ? 'eye-off' : 'eye'}
               size={20}
               color={colors.neutral[500]}
             />
@@ -141,10 +127,6 @@ export default function Signup() {
 
         <TouchableOpacity style={styles.loginButton} onPress={handleSignup}>
           <Text style={styles.loginButtonText}>Sign Up</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.loginButton} onPress={clearStoredData}>
-          <Text style={styles.loginButtonText}>Clear Data</Text>
         </TouchableOpacity>
 
         <View style={styles.orContainer}>
@@ -262,7 +244,7 @@ const styles = StyleSheet.create({
   },
   orText: {
     fontSize: 14,
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: 'Nunito_700Bold',
     color: colors.neutral[500],
     marginHorizontal: 8,
   },

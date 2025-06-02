@@ -28,40 +28,16 @@ export default function Login() {
 
     console.log('Login attempted with:', { email, password });
 
-    try {
-      const response = await axios.post('http://192.168.38.221:5000/api/auth/login', {
-        email,
-        password,
-      });
       setAlertData({
         title: 'Success',
         message: 'Logged in successfully',
         onConfirm: () => {
           setAlertVisible(false);
-          router.push('/loadingScreen');
+          router.push('/loading-screen');
         },
       });
       setAlertVisible(true);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log('Login Error:', error.message);
-        console.log('Error Details:', error.response.data);
-        setAlertData({
-          title: 'Error',
-          message: error.response.data.message || 'Invalid credentials',
-          onConfirm: () => setAlertVisible(false),
-        });
-        setAlertVisible(true);
-      } else {
-        setAlertData({
-          title: 'Error',
-          message: 'Something went wrong',
-          onConfirm: () => setAlertVisible(false),
-        });
-        setAlertVisible(true);
-      }
-    }
-  };
+    };
 
   return (
     <View style={styles.container}>
