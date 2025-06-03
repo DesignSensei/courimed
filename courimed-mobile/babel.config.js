@@ -10,7 +10,6 @@ module.exports = function (api) {
           '@constants': './constants',
         },
       }],
-      '@babel/plugin-proposal-class-properties',
     ],
   };
 };

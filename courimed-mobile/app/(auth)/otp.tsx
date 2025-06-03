@@ -1,16 +1,28 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import CustomAlert from '../components/CustomAlert';
-import { colors } from '../constants/colors';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import CustomAlert from "../components/CustomAlert";
+import { colors } from "../constants/colors";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const OTP = () => {
   const router = useRouter();
   const { email } = useLocalSearchParams();
-  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState<number>(60);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [alertData, setAlertData] = useState({ title: '', message: '', onConfirm: () => {} });
+  const [alertData, setAlertData] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>(new Array(6).fill(null));
 
@@ -29,8 +41,10 @@ const OTP = () => {
   }, []);
 
   const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const secs = (seconds % 60).toString().padStart(2, "0");
     return `${mins}:${secs}`;
   };
 
@@ -49,20 +63,22 @@ const OTP = () => {
   };
 
   const handleVerify = async () => {
-    const otpCode = otp.join('');
+    const otpCode = otp.join("");
+
     if (otpCode.length !== 6) {
       setAlertData({
-        title: 'Error',
-        message: 'Please enter a 6-digit OTP',
+        title: "Error",
+        message: "Please enter a 6-digit OTP",
         onConfirm: () => setAlertVisible(false),
       });
       setAlertVisible(true);
       return;
     }
+
     if (timer <= 0) {
       setAlertData({
-        title: 'Error',
-        message: 'OTP has expired. Please request a new one.',
+        title: "Error",
+        message: "OTP has expired. Please request a new one.",
         onConfirm: () => setAlertVisible(false),
       });
       setAlertVisible(true);
@@ -70,34 +86,48 @@ const OTP = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.133.221:5000/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp: otpCode }),
-      });
-      const data = await response.json();
-      if (data.message === 'OTP verified') {
-        setAlertData({
-          title: 'Success',
-          message: 'Verification complete!',
-          onConfirm: () => {
-            setAlertVisible(false);
-            router.push('/login');
-          },
-        });
-        setAlertVisible(true);
-      } else {
-        setAlertData({
-          title: 'Error',
-          message: data.message || 'Verification failed',
-          onConfirm: () => setAlertVisible(false),
-        });
-        setAlertVisible(true);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      // ===== BACKEND CALL: VERIFY OTP =====
+      // const response = await fetch('http://192.168.133.221:5000/api/auth/verify-otp', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email, otp: otpCode }),
+      // });
+      // const data = await response.json();
+
+      // if (data.message === 'OTP verified') {
+      //   setAlertData({
+      //     title: 'Success',
+      //     message: 'Verification complete!',
+      //     onConfirm: () => {
+      //       setAlertVisible(false);
+      //       router.push('/login');
+      //     },
+      //   });
+      //   setAlertVisible(true);
+      // } else {
+      //   setAlertData({
+      //     title: 'Error',
+      //     message: data.message || 'Verification failed',
+      //     onConfirm: () => setAlertVisible(false),
+      //   });
+      //   setAlertVisible(true);
+      // }
+
+      // ===== FRONTEND SIMULATION =====
       setAlertData({
-        title: 'Error',
+        title: "Success",
+        message: "Verification complete!",
+        onConfirm: () => {
+          setAlertVisible(false);
+          router.push("/create-password");
+        },
+      });
+      setAlertVisible(true);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      setAlertData({
+        title: "Error",
         message: errorMessage,
         onConfirm: () => setAlertVisible(false),
       });
@@ -109,34 +139,48 @@ const OTP = () => {
     if (!canResend) return;
 
     try {
-      const response = await fetch('http://192.168.133.221:5000/api/auth/resend-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (data.message === 'OTP sent') {
-        setOtp(['', '', '', '', '', '']);
-        setTimer(60);
-        setCanResend(false);
-        setAlertData({
-          title: 'Success',
-          message: 'A new OTP has been sent.',
-          onConfirm: () => setAlertVisible(false),
-        });
-        setAlertVisible(true);
-      } else {
-        setAlertData({
-          title: 'Error',
-          message: data.message || 'Failed to resend OTP',
-          onConfirm: () => setAlertVisible(false),
-        });
-        setAlertVisible(true);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      // ===== BACKEND CALL: RESEND OTP =====
+      // const response = await fetch('http://192.168.133.221:5000/api/auth/resend-otp', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email }),
+      // });
+      // const data = await response.json();
+
+      // if (data.message === 'OTP sent') {
+      //   setOtp(['', '', '', '', '', '']);
+      //   setTimer(60);
+      //   setCanResend(false);
+      //   setAlertData({
+      //     title: 'Success',
+      //     message: 'A new OTP has been sent.',
+      //     onConfirm: () => setAlertVisible(false),
+      //   });
+      //   setAlertVisible(true);
+      // } else {
+      //   setAlertData({
+      //     title: 'Error',
+      //     message: data.message || 'Failed to resend OTP',
+      //     onConfirm: () => setAlertVisible(false),
+      //   });
+      //   setAlertVisible(true);
+      // }
+
+      // ===== FRONTEND SIMULATION =====
+      setOtp(["", "", "", "", "", ""]);
+      setTimer(60);
+      setCanResend(false);
       setAlertData({
-        title: 'Error',
+        title: "Success",
+        message: "A new OTP has been sent.",
+        onConfirm: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      setAlertData({
+        title: "Error",
         message: errorMessage,
         onConfirm: () => setAlertVisible(false),
       });
@@ -148,14 +192,17 @@ const OTP = () => {
     router.back();
   };
 
-  const setRef = useCallback((index: number) => (ref: TextInput | null) => {
-    inputRefs.current[index] = ref;
-  }, []);
+  const setRef = useCallback(
+    (index: number) => (ref: TextInput | null) => {
+      inputRefs.current[index] = ref;
+    },
+    []
+  );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-        <Text style={styles.backButtonText}>← Back</Text>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color={colors.neutral[800]} />
       </TouchableOpacity>
 
       <View style={styles.header}>
@@ -181,7 +228,11 @@ const OTP = () => {
       <Text style={styles.timer}>Time remaining: {formatTimer(timer)}</Text>
 
       <Pressable
-        style={[styles.verifyButton, styles.resendButton, !canResend && styles.disabledButton]}
+        style={[
+          styles.verifyButton,
+          styles.resendButton,
+          !canResend && styles.disabledButton,
+        ]}
         onPress={handleResend}
         disabled={!canResend}
       >
@@ -207,60 +258,59 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: colors.shades.white,
+    paddingVertical: 40,
   },
   header: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     marginTop: 64,
     marginBottom: 20,
   },
   backButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     left: 20,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: colors.primary[500],
-    fontFamily: 'Nunito_400Regular',
+    marginTop: 20,
+    marginBottom: 10,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.neutral[900],
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
     marginBottom: 5,
   },
   instruction: {
     fontSize: 16,
     color: colors.neutral[600],
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: "Nunito_400Regular",
   },
   otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   otpBox: {
     width: 52,
     height: 64,
-    backgroundColor: colors.neutral[200],
+    borderColor: colors.neutral[300],
+    borderWidth: 1,
     borderRadius: 8,
     fontSize: 18,
-    textAlign: 'center',
-    fontFamily: 'Nunito_400Regular',
+    textAlign: "center",
+    fontFamily: "Nunito_400Regular",
   },
   timer: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 20,
     color: colors.neutral[600],
-    fontFamily: 'Nunito_400Regular',
+    fontFamily: "Nunito_400Regular",
   },
   verifyButton: {
     backgroundColor: colors.primary[500],
     paddingVertical: 16,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   resendButton: {
@@ -272,12 +322,12 @@ const styles = StyleSheet.create({
   verifyButtonText: {
     color: colors.shades.white,
     fontSize: 16,
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
   },
   resendButtonText: {
     color: colors.shades.white,
     fontSize: 16,
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
   },
 });
 
