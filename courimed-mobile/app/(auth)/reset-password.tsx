@@ -14,9 +14,12 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useState } from "react";
 import CustomAlert from "../components/CustomAlert";
 
-export default function ForgotPassword() {
+export default function ResetPassword() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertData, setAlertData] = useState({
     title: "",
@@ -24,33 +27,42 @@ export default function ForgotPassword() {
     onConfirm: () => {},
   });
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-
-  const handleSendResetLink = () => {
-    if (!email.trim()) {
+  const handleResetPassword = () => {
+    if (!password || !confirmPassword) {
       setAlertData({
         title: "Error",
-        message: "Please enter your email address.",
+        message: "Please fill in both fields.",
         onConfirm: () => setAlertVisible(false),
       });
       setAlertVisible(true);
       return;
     }
 
-    if (!isValidEmail(email)) {
+    if (password.length < 8) {
       setAlertData({
         title: "Error",
-        message: "Please enter a valid email address.",
+        message: "Password must be at least 8 characters long.",
         onConfirm: () => setAlertVisible(false),
       });
       setAlertVisible(true);
       return;
     }
+
+    if (password !== confirmPassword) {
+      setAlertData({
+        title: "Error",
+        message: "Passwords do not match.",
+        onConfirm: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
+      return;
+    }
+
+    // Here you can add API call to update password on backend
 
     setAlertData({
       title: "Success",
-      message: "Password reset link sent to your email.",
+      message: "Your password has been reset successfully.",
       onConfirm: () => {
         setAlertVisible(false);
         router.push("/login");
@@ -73,36 +85,63 @@ export default function ForgotPassword() {
         </TouchableOpacity>
 
         <View style={styles.formContainer}>
-          <Text style={styles.title}>Forgot Password</Text>
+          <Text style={styles.title}>Reset Password</Text>
           <Text style={styles.subtitle}>
-            Enter your email address below to receive a password reset link.
+            Enter your new password below. Minimum of 8 characters.
           </Text>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor={colors.neutral[500]}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={email}
-              onChangeText={setEmail}
-            />
+            <Text style={styles.label}>New password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter new password"
+                placeholderTextColor={colors.neutral[500]}
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.neutral[500]}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirm new password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Re-enter new password"
+                placeholderTextColor={colors.neutral[500]}
+                secureTextEntry={!showConfirmPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.neutral[500]}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        style={[
-          styles.continueButton,
-          !isValidEmail(email) && styles.buttonDisabled,
-        ]}
-        onPress={handleSendResetLink}
-        disabled={!isValidEmail(email)}
-      >
-        <Text style={styles.continueButtonText}>Send Reset Link</Text>
+      <TouchableOpacity style={styles.continueButton} onPress={handleResetPassword}>
+        <Text style={styles.continueButtonText}>Reset Password</Text>
       </TouchableOpacity>
 
       <CustomAlert
@@ -168,6 +207,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.neutral[500],
   },
+  passwordContainer: {
+    position: "relative",
+    width: "100%",
+  },
+  iconButton: {
+    position: "absolute",
+    right: 20,
+    top: 15,
+  },
   continueButton: {
     width: "100%",
     height: 50,
@@ -176,9 +224,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-  },
-  buttonDisabled: {
-    backgroundColor: colors.neutral[300],
   },
   continueButtonText: {
     fontSize: 16,
