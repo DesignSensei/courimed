@@ -11,45 +11,77 @@ import {
 import { useRouter } from "expo-router";
 import { colors } from "../constants/colors";
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import CustomAlert from "../components/CustomAlert";
+import BottomSheetPicker from "../components/BottomSheetPicker";
 import CountryPicker, {
   Country,
   CountryCode,
 } from "react-native-country-picker-modal";
-import { Ionicons } from "@expo/vector-icons";
-import CustomAlert from "../components/CustomAlert";
 
-export default function Signup() {
+type Frequency = "Daily" | "Weekly" | "As Needed";
+
+export default function ContactPerson() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [referralCode, setReferralCode] = useState("");
-  const [countryCode, setCountryCode] = useState<CountryCode>("NG");
-  const [country, setCountry] = useState<Country | null>(null);
-  const [withCallingCode, setWithCallingCode] = useState(true);
+
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertData, setAlertData] = useState({
     title: "",
     message: "",
     onConfirm: () => {},
   });
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [countryCode, setCountryCode] = useState<CountryCode>("NG");
+  const [country, setCountry] = useState<Country | null>(null);
+  const [deliveryFrequency, setDeliveryFrequency] = useState<Frequency | "">(
+    ""
+  );
+  const [deliveryVolume, setDeliveryVolume] = useState("");
+  const [paymentPreference, setPaymentPreference] = useState("");
 
-  const handleSignup = async () => {
-    if (!firstName || !lastName || !phone || !email) {
+  const frequencyOptions: Frequency[] = ["Daily", "Weekly", "As Needed"];
+
+  const deliveryVolumeOptionsMap: Record<Frequency, string[]> = {
+    Daily: [
+      "Less than 5 deliveries per day",
+      "5-10 deliveries per day",
+      "More than 10 deliveries per day",
+    ],
+    Weekly: [
+      "Less than 20 deliveries per week",
+      "5-10 deliveries per week",
+      "More than 10 deliveries per week",
+    ],
+    "As Needed": ["As needed (variable volume)"],
+  };
+
+  const handleContinue = async () => {
+    if (
+      !firstName ||
+      !lastName ||
+      !phone ||
+      !email ||
+      !deliveryFrequency ||
+      !deliveryVolume ||
+      !paymentPreference
+    ) {
       setAlertData({
         title: "Missing Info",
-        message: "Phone and email are required.",
+        message: "All fields are required to proceed.",
         onConfirm: () => setAlertVisible(false),
       });
       setAlertVisible(true);
       return;
     }
 
-    // Simulate API call
     setTimeout(() => {
       router.push({
-        pathname: "/otp",
+        pathname: "/(auth)/accept-terms",
         params: {
           email: encodeURIComponent(email),
           phone: encodeURIComponent(phone),
@@ -77,12 +109,15 @@ export default function Signup() {
         </TouchableOpacity>
 
         <View style={styles.topContainer}>
-          <Text style={styles.title}>Let’s get started</Text>
+          <Text style={styles.title}>Contact Person and Preferences</Text>
           <Text style={styles.subtitle}>
-            Enter your mobile number and email address and we’ll send a 6-digit
-            code to confirm it. SMS rates may apply.
+            Set your go-to person and the support you care about.
           </Text>
 
+          <Text style={styles.sectionTitle}>Contact Person</Text>
+          <Text style={styles.sectionSubtitle}>
+            Provide the name and contact details of your primary liaison.
+          </Text>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>First name</Text>
             <TextInput
@@ -154,22 +189,59 @@ export default function Signup() {
             </View>
           </View>
 
+          <Text style={styles.sectionTitle}>Services Preferences</Text>
+          <Text style={styles.sectionSubtitle}>
+            Tell us how often and what volume of deliveries you expect, and your
+            payment preference.
+          </Text>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Referral code (optional)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. REF123"
-              placeholderTextColor={colors.neutral[400]}
-              autoCapitalize="characters"
-              value={referralCode}
-              onChangeText={setReferralCode}
+            <BottomSheetPicker
+              label="Delivery Frequency"
+              value={deliveryFrequency}
+              options={frequencyOptions}
+              onSelect={(val) => {
+                setDeliveryFrequency(val as Frequency | "");
+                setDeliveryVolume("");
+              }}
+              required
+            />
+          </View>
+
+              <View style={styles.inputGroup}>
+          <BottomSheetPicker
+            label="Delivery Volume"
+            value={deliveryVolume}
+            options={
+              deliveryFrequency
+                ? deliveryVolumeOptionsMap[deliveryFrequency]
+                : []
+            }
+            onSelect={setDeliveryVolume}
+            required
+          />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <BottomSheetPicker
+              label="Payment Preference"
+              value={paymentPreference}
+              options={[
+                "Pay-per-Delivery",
+                "Wallet System",
+                "Credit Invoicing",
+              ]}
+              onSelect={setPaymentPreference}
+              required
             />
           </View>
         </View>
       </ScrollView>
 
       <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.continueButton} onPress={handleSignup}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={handleContinue}
+        >
           <Text style={styles.continueButtonText}>Continue</Text>
         </TouchableOpacity>
       </View>
@@ -210,7 +282,7 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     color: colors.neutral[700],
     textAlign: "left",
-    marginBottom: 30,
+    marginBottom: 8,
     paddingRight: 10,
   },
   inputGroup: {
@@ -251,6 +323,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Nunito_400Regular",
     color: colors.neutral[900],
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: "Nunito_700Bold",
+    color: colors.neutral[900],
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: colors.neutral[700],
+    marginBottom: 16,
   },
   bottomContainer: {
     marginTop: 30,

@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
+    "assetBundlePatterns": ["assets/images/*"],
     "scheme": "courimedmobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

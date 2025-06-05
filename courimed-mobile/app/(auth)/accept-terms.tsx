@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   KeyboardAvoidingView,
+  Modal,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
@@ -15,11 +16,27 @@ import { colors } from "../constants/colors";
 export default function AcceptTerms() {
   const router = useRouter();
   const [accepted, setAccepted] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertData, setAlertData] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
   const handleContinue = () => {
     if (accepted) {
-      router.push("/login");
+      setAlertData({
+        title: "Account Creation",
+        message: "Are you sure you want to create your business account?",
+        onConfirm: () => {
+          setAlertVisible(false);
+          router.push("/loading-screen");
+        },
+      });
+      setAlertVisible(true);
+      return;
     }
+    router.push("/loading-screen");
   };
 
   return (
@@ -32,25 +49,17 @@ export default function AcceptTerms() {
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <Text style={styles.title}>Accept Terms & Privacy</Text>
+        <Text style={styles.title}>Terms and Conditions</Text>
         <Text style={styles.subtitle}>
-          Please read and accept our Terms of Service and Privacy Policy to
-          continue.
+          Please review our Terms of Service and Privacy Policy before proceeding.
         </Text>
 
         <ScrollView style={styles.termsBox}>
-          <TouchableOpacity
-            style={styles.iconTextRow}
-            onPress={() => {}}
-          >
+          <TouchableOpacity style={styles.iconTextRow} onPress={() => {}}>
             <View style={styles.iconBackground}>
-              <Ionicons
-                name="document-text"
-                size={24}
-                color={colors.primary[500]}
-              />
+              <Ionicons name="document-text" size={24} color={colors.primary[500]} />
             </View>
-            <Text style={styles.termsLabel}>Terms of Use</Text>
+            <Text style={styles.termsLabel}>Terms of Service</Text>
             <Ionicons
               name="chevron-forward"
               size={16}
@@ -59,16 +68,9 @@ export default function AcceptTerms() {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.iconTextRow}
-            onPress={() => {}}
-          >
+          <TouchableOpacity style={styles.iconTextRow} onPress={() => {}}>
             <View style={styles.iconBackground}>
-              <Ionicons
-                name="document-text"
-                size={24}
-                color={colors.primary[500]}
-              />
+              <Ionicons name="document-text" size={24} color={colors.primary[500]} />
             </View>
             <Text style={styles.termsLabel}>Privacy Policy</Text>
             <Ionicons
@@ -85,16 +87,10 @@ export default function AcceptTerms() {
           onPress={() => setAccepted(!accepted)}
         >
           <View style={[styles.checkbox, accepted && styles.checkboxChecked]}>
-            {accepted && (
-              <Ionicons
-                name="checkmark"
-                size={18}
-                color={colors.shades.white}
-              />
-            )}
+            {accepted && <Ionicons name="checkmark" size={18} color={colors.shades.white} />}
           </View>
           <Text style={styles.checkboxLabel}>
-            I accept the Terms of Service and Privacy Policy
+            I agree to Courimed's Terms & Conditions. <Text style={{ color: "red" }}>*</Text>
           </Text>
         </TouchableOpacity>
 
@@ -103,9 +99,40 @@ export default function AcceptTerms() {
           onPress={handleContinue}
           disabled={!accepted}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>Create Account</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal for confirmation */}
+      <Modal
+        visible={alertVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAlertVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>{alertData.title}</Text>
+            <Text style={styles.modalMessage}>{alertData.message}</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setAlertVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>No, cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={alertData.onConfirm}
+              >
+                <Text style={styles.confirmButtonText}>Yes, create it!</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -140,11 +167,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
-  },
-  termsText: {
-    fontSize: 14,
-    fontFamily: "Nunito_400Regular",
-    color: colors.neutral[800],
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -216,9 +238,60 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
-
   backButtonIcon: {
     fontSize: 24,
     color: colors.neutral[800],
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+  },
+  modalContainer: {
+    backgroundColor: colors.shades.white,
+    borderRadius: 12,
+    padding: 20,
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: "Nunito_700Bold",
+    marginBottom: 8,
+    color: colors.neutral[900],
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontFamily: "Nunito_400Regular",
+    color: colors.neutral[800],
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    marginLeft: 12,
+  },
+  cancelButton: {
+    backgroundColor: colors.neutral[200],
+  },
+  confirmButton: {
+    backgroundColor: colors.primary[500],
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: colors.neutral[700],
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+    color: colors.shades.white,
   },
 });

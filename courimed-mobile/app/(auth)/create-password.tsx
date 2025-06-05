@@ -63,7 +63,7 @@ export default function CreatePassword() {
       message: "Password set successfully.",
       onConfirm: () => {
         setAlertVisible(false);
-        router.push("/accept-terms");
+        router.push("/business-onboarding/business-classification");
       },
     });
     setAlertVisible(true);

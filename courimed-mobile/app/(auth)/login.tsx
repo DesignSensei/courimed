@@ -43,11 +43,9 @@ export default function Login() {
       title: "Success",
       message: "Logged in successfully",
       onConfirm: () => {
-        setAlertVisible(false);
         router.push("/loading-screen");
       },
     });
-    setAlertVisible(true);
   };
 
   return (
@@ -122,7 +120,7 @@ export default function Login() {
           </View>
 
           <View style={{ marginTop: 32 }}>
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <TouchableOpacity style={styles.loginButton} onPress={ () => router.push("/loading-screen")}>
               <Text style={styles.loginButtonText}>Log in</Text>
             </TouchableOpacity>
           </View>

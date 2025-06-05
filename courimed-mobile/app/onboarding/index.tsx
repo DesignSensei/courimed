@@ -24,17 +24,17 @@ const onboardingData: OnboardingItem[] = [
   {
     id: "1",
     title: "Swift and Reliable Delivery",
-    image: require("../../assets/images/courier-1.webp"),
+    image: require("../../assets/images/auth-1.png"),
   },
   {
     id: "2",
     title: "Precision in Every Package",
-    image: require("../../assets/images/courier-1.webp"),
+    image: require("../../assets/images/auth-2.png"),
   },
   {
     id: "3",
     title: "Built for Critical Moments",
-    image: require("../../assets/images/courier-1.webp"),
+    image: require("../../assets/images/auth-1.png"),
   },
 ];
 
@@ -148,9 +148,9 @@ const styles = StyleSheet.create({
     marginTop: 64,
   },
   backgroundImage: {
-    width: "60%",
+    width: "80%",
     height: screenWidth * 0.8,
-    resizeMode: "cover",
+    resizeMode: "contain",
   },
   title: {
     fontSize: 24,
