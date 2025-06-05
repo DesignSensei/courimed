@@ -24,17 +24,17 @@ const onboardingData: OnboardingItem[] = [
   {
     id: "1",
     title: "Swift and Reliable Delivery",
-    image: require("../../assets/images/auth-1.png"),
+    image: require("../../assets/images/auth-2.png"),
   },
   {
     id: "2",
     title: "Precision in Every Package",
-    image: require("../../assets/images/auth-2.png"),
+    image: require("../../assets/images/auth-1.png"),
   },
   {
     id: "3",
     title: "Built for Critical Moments",
-    image: require("../../assets/images/auth-1.png"),
+    image: require("../../assets/images/auth-2.png"),
   },
 ];
 
