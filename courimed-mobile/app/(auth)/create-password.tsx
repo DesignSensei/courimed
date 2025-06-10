@@ -9,10 +9,10 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { colors } from "../constants/colors";
+import { colors } from "@constants/colors";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useState } from "react";
-import CustomAlert from "../components/CustomAlert";
+import CustomAlert from "@components/CustomAlert";
 
 export default function CreatePassword() {
   const router = useRouter();

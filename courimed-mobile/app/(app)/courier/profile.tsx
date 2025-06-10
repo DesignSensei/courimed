@@ -77,7 +77,7 @@ export default function Profile() {
         <View style={styles.cardGroup}>
           <ProfileCardItem
             icon="briefcase"
-            label="Business Profile Info"
+            label="Registration Papers"
             bgColor={colors.primary[100]}
             onPress={() => router.push("/customer/edit-business-info")}
           />

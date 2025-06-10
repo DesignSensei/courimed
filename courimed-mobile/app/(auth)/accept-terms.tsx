@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { colors } from "../constants/colors";
+import { colors } from "@constants/colors";
 
 export default function AcceptTerms() {
   const router = useRouter();

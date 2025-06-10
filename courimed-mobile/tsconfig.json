@@ -10,9 +10,19 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@components/*": ["app/components/*"],
+      "@constants/*": ["app/constants/*"],
+      "@data/*": ["app/data/*"],
+      "@assets/*": ["assets/*"],
+      "@images/*": ["assets/images/*"],
+      "@fonts/*": ["assets/fonts/*"],
+      "@auth/*": ["app/(auth)/*"],
+      "@customer/*": ["app/(app)/customer/*"],
+      "@courier/*": ["app/(app)/courier/*"],
+      "@orders/*": ["app/(app)/orders/*"],
+      "@profile/*": ["app/(app)/profile/*"],
+      "@business/*": ["app/business-onboarding/*"],
+      "@onboarding/*": ["app/onboarding/*"]
     }
   },
   "include": [
@@ -20,6 +30,6 @@
     "**/*.tsx",
     "expo-env.d.ts",
     ".expo/types/**/*.ts"
-  ],
+, "app/(app)/customer/.screens/edit-profile.tsx", "app/(app)/customer/.screens/wallet.tsx"  ],
   "extends": "expo/tsconfig.base"
 }

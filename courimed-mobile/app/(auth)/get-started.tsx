@@ -9,14 +9,14 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { colors } from "../constants/colors";
+import { colors } from "@constants/colors";
 import { useState } from "react";
 import CountryPicker, {
   Country,
   CountryCode,
 } from "react-native-country-picker-modal";
 import { Ionicons } from "@expo/vector-icons";
-import CustomAlert from "../components/CustomAlert";
+import CustomAlert from "@components/CustomAlert";
 
 export default function Signup() {
   const router = useRouter();

@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "@constants/colors";
-import { useState } from "react";
-import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import CustomAlert from "@components/CustomAlert";
 import BottomSheetPicker from "@components/BottomSheetPicker";
 import locationData from "@data/locationData.json";
 
-export default function BusinessClassification() {
+export default function EditBusinessInfo() {
   const router = useRouter();
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertData, setAlertData] = useState({
@@ -24,18 +24,56 @@ export default function BusinessClassification() {
     message: "",
     onConfirm: () => {},
   });
+
+  const [originalInfo, setOriginalInfo] = useState<{
+    selectedType: "pharmacy" | "hospital" | "laboratory" | null;
+    businessCategory: string;
+    businessName: string;
+    locationAlias: string;
+    countryName: string;
+    stateName: string;
+    lgaName: string;
+    townName: string;
+    streetAddress: string;
+    postalCode: string;
+  }>({
+    selectedType: null,
+    businessCategory: "",
+    businessName: "",
+    locationAlias: "",
+    countryName: "Nigeria",
+    stateName: "",
+    lgaName: "",
+    townName: "",
+    streetAddress: "",
+    postalCode: "",
+  });
+
   const [selectedType, setSelectedType] = useState<
     "pharmacy" | "hospital" | "laboratory" | null
-  >(null);
-  const [businessCategory, setBusinessCategory] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [locationAlias, setLocationAlias] = useState("");
-  const [countryName, setCountryName] = useState("Nigeria");
-  const [stateName, setStateName] = useState("");
-  const [lgaName, setLgaName] = useState("");
-  const [townName, setTownName] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+  >(originalInfo.selectedType);
+  const [businessCategory, setBusinessCategory] = useState(
+    originalInfo.businessCategory
+  );
+  const [businessName, setBusinessName] = useState(originalInfo.businessName);
+  const [locationAlias, setLocationAlias] = useState(
+    originalInfo.locationAlias
+  );
+  const [countryName, setCountryName] = useState(originalInfo.countryName);
+  const [stateName, setStateName] = useState(originalInfo.stateName);
+  const [lgaName, setLgaName] = useState(originalInfo.lgaName);
+  const [townName, setTownName] = useState(originalInfo.townName);
+  const [streetAddress, setStreetAddress] = useState(
+    originalInfo.streetAddress
+  );
+  const [postalCode, setPostalCode] = useState(originalInfo.postalCode);
+
+  const businessTypeOptions = [
+    { label: "Pharmacy", value: "pharmacy" },
+    { label: "Hospital", value: "hospital" },
+    { label: "Laboratory", value: "laboratory" },
+  ];
+
   const countryOptions = locationData.countries;
   const selectedCountry = countryName;
   const statesByCountry = locationData.statesByCountry as Record<
@@ -68,7 +106,52 @@ export default function BusinessClassification() {
     laboratory: ["Diagnostic Laboratory", "Research Laboratory"],
   };
 
-  const handleContinue = async () => {
+  const isUnchanged = (current: string, original: string) =>
+    current === original;
+
+  useEffect(() => {
+    const fetchedBusinessInfo = {
+      selectedType: "pharmacy" as "pharmacy" | "hospital" | "laboratory",
+      businessCategory: "Community Retail Pharmacy",
+      businessName: "FaithMed Pharmacy",
+      locationAlias: "Lekki Branch",
+      countryName: "Nigeria",
+      stateName: "Lagos",
+      lgaName: "Ikeja",
+      townName: "Lekki",
+      streetAddress: "123 Lekki Road",
+      postalCode: "101001",
+    };
+
+    setOriginalInfo(fetchedBusinessInfo);
+    setSelectedType(fetchedBusinessInfo.selectedType);
+    setBusinessCategory(fetchedBusinessInfo.businessCategory);
+    setBusinessName(fetchedBusinessInfo.businessName);
+    setLocationAlias(fetchedBusinessInfo.locationAlias);
+    setCountryName(fetchedBusinessInfo.countryName);
+    setStateName(fetchedBusinessInfo.stateName);
+    setLgaName(fetchedBusinessInfo.lgaName);
+    setTownName(fetchedBusinessInfo.townName);
+    setStreetAddress(fetchedBusinessInfo.streetAddress);
+    setPostalCode(fetchedBusinessInfo.postalCode);
+  }, []);
+
+  const hasChanges = () => {
+    return (
+      selectedType !== originalInfo.selectedType ||
+      businessCategory !== originalInfo.businessCategory ||
+      businessName !== originalInfo.businessName ||
+      locationAlias !== originalInfo.locationAlias ||
+      countryName !== originalInfo.countryName ||
+      stateName !== originalInfo.stateName ||
+      lgaName !== originalInfo.lgaName ||
+      townName !== originalInfo.townName ||
+      streetAddress !== originalInfo.streetAddress ||
+      postalCode !== originalInfo.postalCode
+    );
+  };
+
+  const handleSave = async () => {
     if (
       !businessCategory ||
       !businessName ||
@@ -105,108 +188,37 @@ export default function BusinessClassification() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <Ionicons name="arrow-back" size={24} color={colors.neutral[800]} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Register your Business</Text>
+        <Text style={styles.title}>Edit Business Information</Text>
 
         <Text style={styles.sectionTitle}>Business Classification</Text>
         <Text style={styles.sectionSubtitle}>Select your business type.</Text>
-        <View style={styles.tabRow}>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              selectedType === "pharmacy" && styles.activeTab,
-            ]}
-            onPress={() => {
-              setSelectedType("pharmacy");
+        <View style={styles.inputGroup}>
+          <BottomSheetPicker
+            label="Business Type"
+            value={selectedType ?? ""}
+            options={businessTypeOptions.map((o) => o.value)}
+            onSelect={(val) => {
+              setSelectedType(val as "pharmacy" | "hospital" | "laboratory");
               setBusinessCategory("");
             }}
-          >
-            <FontAwesome5
-              name="prescription-bottle-alt"
-              size={18}
-              color={
-                selectedType === "pharmacy"
-                  ? colors.shades.white
-                  : colors.neutral[700]
-              }
-              style={styles.icon}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                selectedType === "pharmacy" && styles.activeTabText,
-              ]}
-            >
-              Pharmacy
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              selectedType === "hospital" && styles.activeTab,
-            ]}
-            onPress={() => {
-              setSelectedType("hospital");
-              setBusinessCategory("");
+            valueStyle={{
+              color: isUnchanged(
+                selectedType ?? "",
+                originalInfo.selectedType ?? ""
+              )
+                ? colors.neutral[400]
+                : colors.neutral[900],
             }}
-          >
-            <MaterialIcons
-              name="local-hospital"
-              size={18}
-              color={
-                selectedType === "hospital"
-                  ? colors.shades.white
-                  : colors.neutral[700]
-              }
-              style={styles.icon}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                selectedType === "hospital" && styles.activeTabText,
-              ]}
-            >
-              Hospital
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              selectedType === "laboratory" && styles.activeTab,
-            ]}
-            onPress={() => {
-              setSelectedType("laboratory");
-              setBusinessCategory("");
-            }}
-          >
-            <Ionicons
-              name="flask"
-              size={18}
-              color={
-                selectedType === "laboratory"
-                  ? colors.shades.white
-                  : colors.neutral[700]
-              }
-              style={styles.icon}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                selectedType === "laboratory" && styles.activeTabText,
-              ]}
-            >
-              Laboratory
-            </Text>
-          </TouchableOpacity>
+            required
+          />
         </View>
 
         <Text style={styles.sectionTitle}>Business Information</Text>
         <Text style={styles.sectionSubtitle}>
-          Enter your business category and official business name.
+          Edit your business category and official business name.
         </Text>
 
         <View>
@@ -216,6 +228,14 @@ export default function BusinessClassification() {
               value={businessCategory}
               options={selectedType ? businessCategories[selectedType] : []}
               onSelect={(val) => setBusinessCategory(val)}
+              valueStyle={{
+                color: isUnchanged(
+                  businessCategory,
+                  originalInfo.businessCategory
+                )
+                  ? colors.neutral[400]
+                  : colors.neutral[900],
+              }}
               required
             />
           </View>
@@ -225,7 +245,14 @@ export default function BusinessClassification() {
               Business Name <Text style={{ color: "red" }}>*</Text>
             </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  color: isUnchanged(businessName, originalInfo.businessName)
+                    ? colors.neutral[400]
+                    : colors.neutral[900],
+                },
+              ]}
               placeholder="e.g. FaithMed Pharmacy"
               placeholderTextColor={colors.neutral[500]}
               value={businessName}
@@ -235,8 +262,7 @@ export default function BusinessClassification() {
 
           <Text style={styles.sectionTitle}>Business Address</Text>
           <Text style={styles.sectionSubtitle}>
-            Provide your business address for pickups. Additional locations can
-            be added later.
+            Edit your business address details below.
           </Text>
 
           <View style={styles.inputGroup}>
@@ -244,7 +270,14 @@ export default function BusinessClassification() {
               Location Alias <Text style={{ color: "red" }}>*</Text>
             </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  color: isUnchanged(locationAlias, originalInfo.locationAlias)
+                    ? colors.neutral[400]
+                    : colors.neutral[900],
+                },
+              ]}
               placeholder="Enter location alias. (e.g Lekki Branch or Head Office)"
               placeholderTextColor={colors.neutral[500]}
               value={locationAlias}
@@ -259,6 +292,11 @@ export default function BusinessClassification() {
                 value={countryName}
                 options={countryOptions}
                 onSelect={(val) => setCountryName(val)}
+                valueStyle={{
+                  color: isUnchanged(countryName, originalInfo.countryName)
+                    ? colors.neutral[400]
+                    : colors.neutral[900],
+                }}
                 required
               />
             </View>
@@ -268,6 +306,11 @@ export default function BusinessClassification() {
                 value={stateName}
                 options={stateOptions}
                 onSelect={(val) => setStateName(val)}
+                valueStyle={{
+                  color: isUnchanged(stateName, originalInfo.stateName)
+                    ? colors.neutral[400]
+                    : colors.neutral[900],
+                }}
                 required
               />
             </View>
@@ -280,6 +323,11 @@ export default function BusinessClassification() {
                 value={lgaName}
                 options={lgaOptions}
                 onSelect={setLgaName}
+                valueStyle={{
+                  color: isUnchanged(lgaName, originalInfo.lgaName)
+                    ? colors.neutral[400]
+                    : colors.neutral[900],
+                }}
                 required
               />
             </View>
@@ -289,6 +337,11 @@ export default function BusinessClassification() {
                 value={townName}
                 options={townOptions}
                 onSelect={setTownName}
+                valueStyle={{
+                  color: isUnchanged(townName, originalInfo.townName)
+                    ? colors.neutral[400]
+                    : colors.neutral[900],
+                }}
                 required
               />
             </View>
@@ -300,7 +353,17 @@ export default function BusinessClassification() {
                 Street Address <Text style={{ color: "red" }}>*</Text>
               </Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  {
+                    color: isUnchanged(
+                      streetAddress,
+                      originalInfo.streetAddress
+                    )
+                      ? colors.neutral[400]
+                      : colors.neutral[900],
+                  },
+                ]}
                 placeholder="Enter street name"
                 placeholderTextColor={colors.neutral[500]}
                 value={streetAddress}
@@ -308,11 +371,16 @@ export default function BusinessClassification() {
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>
-                Postal Code (Optional)
-              </Text>
+              <Text style={styles.label}>Postal Code (Optional)</Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  {
+                    color: isUnchanged(postalCode, originalInfo.postalCode)
+                      ? colors.neutral[400]
+                      : colors.neutral[900],
+                  },
+                ]}
                 placeholder="Enter postal code"
                 placeholderTextColor={colors.neutral[500]}
                 value={postalCode}
@@ -326,10 +394,11 @@ export default function BusinessClassification() {
 
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          style={styles.continueButton}
-          onPress={handleContinue}
+          style={[styles.saveButton, { opacity: hasChanges() ? 1 : 0.5 }]}
+          disabled={!hasChanges()}
+          onPress={handleSave}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
       </View>
 
@@ -367,12 +436,6 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     color: colors.neutral[900],
   },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: "Nunito_400Regular",
-    color: colors.neutral[700],
-    marginBottom: 30,
-  },
   sectionTitle: {
     fontSize: 18,
     fontFamily: "Nunito_700Bold",
@@ -385,37 +448,6 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     color: colors.neutral[700],
     marginBottom: 8,
-  },
-  tabRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  tabButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.neutral[300],
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    backgroundColor: colors.shades.white,
-  },
-  activeTab: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
-  },
-  tabText: {
-    fontSize: 14,
-    fontFamily: "Nunito_600SemiBold",
-    color: colors.neutral[700],
-  },
-  activeTabText: {
-    color: colors.shades.white,
-  },
-  icon: {
-    marginRight: 4,
   },
   inputGroup: {
     marginTop: 12,
@@ -433,22 +465,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     fontFamily: "Nunito_400Regular",
-    color: colors.neutral[900],
     borderWidth: 1,
     borderColor: colors.neutral[500],
-  },
-  dropdownText: {
-    fontSize: 16,
-    fontFamily: "Nunito_400Regular",
-    color: colors.neutral[900],
-  },
-  placeholderText: {
-    color: colors.neutral[500],
   },
   bottomContainer: {
     paddingBottom: 20,
   },
-  continueButton: {
+  saveButton: {
     width: "100%",
     height: 50,
     backgroundColor: colors.primary[500],
@@ -457,28 +480,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
-  continueButtonText: {
+  saveButtonText: {
     fontSize: 16,
     fontFamily: "Nunito_700Bold",
     color: colors.shades.white,
-  },
-  sheetTitle: {
-    fontSize: 16,
-    fontFamily: "Nunito_700Bold",
-    color: colors.neutral[900],
-    marginBottom: 12,
-  },
-  dropdownOption: {
-    paddingVertical: 14,
-    borderBottomColor: colors.neutral[200],
-    borderBottomWidth: 1,
-  },
-  dropdownOptionText: {
-    fontSize: 16,
-    fontFamily: "Nunito_400Regular",
-    color: colors.neutral[900],
-  },
-  disabledDropdown: {
-    borderColor: colors.neutral[500],
   },
 });

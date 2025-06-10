@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
-import { colors } from '../constants/colors';
+import { colors } from '@constants/colors';
 
 interface CustomAlertProps {
   isVisible: boolean;

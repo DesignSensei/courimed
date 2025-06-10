@@ -8,7 +8,7 @@ export default function LoadingScreen() {
   useEffect(() => {
     
     const timer = setTimeout(() => {
-      router.replace("../(app)/customer");
+      router.replace("../(app)/customer/home");
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -17,7 +17,7 @@ export default function LoadingScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#dd5d05' }}>
       <Image
-      source={require("../../assets/images/courimed-icon-white.png")}
+      source={require("@images/courimed-icon-white.png")}
       style={{ width: "30%", height: undefined, aspectRatio: 1, resizeMode: 'contain' }}
       />
     </View>

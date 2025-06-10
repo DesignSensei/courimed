@@ -7,9 +7,10 @@ import {
     FlatList,
     Pressable,
     StyleSheet,
+    TextStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../constants/colors';
+import { colors } from '@constants/colors';
 
 interface BottomSheetPickerProps {
   label: string;
@@ -17,6 +18,7 @@ interface BottomSheetPickerProps {
   options: string[];
   onSelect: (value: string) => void;
   required?: boolean;
+  valueStyle?: TextStyle;
 }
 
 export default function BottomSheetPicker({
@@ -25,6 +27,7 @@ export default function BottomSheetPicker({
     options,
     onSelect,
     required = false,
+    valueStyle = {},
 }: BottomSheetPickerProps) {
     const [visible, setVisible] = React.useState(false);
 
@@ -38,7 +41,8 @@ export default function BottomSheetPicker({
         <Text
           style={[
             styles.dropdownText,
-            !value && styles.placeholderText,
+            !value ? styles.placeholderText : null,
+            valueStyle,
           ]}
         >
           {value || `Select ${label.toLowerCase()}...`}

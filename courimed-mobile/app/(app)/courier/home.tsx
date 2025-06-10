@@ -1,5 +1,10 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { colors } from "../../constants/colors";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity } from "react-native";
+import { colors } from "@constants/colors";
 import { useRouter } from "expo-router";
 import { ScrollView, Dimensions } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,13 +22,13 @@ export default function Home() {
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push("/customer/profile")}>
           <Image
-            source={require("../../../assets/images/protonaut-2.png")}
+            source={require("@assets/images/protonaut-2.png")}
             style={styles.avatar}
           />
         </TouchableOpacity>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.greeting}>Hello Izu</Text>
+          <Text style={styles.greeting}>Hello User</Text>
           <View style={styles.locationRow}>
             <Ionicons
               name="location-outline"
